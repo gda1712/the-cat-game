@@ -262,7 +262,7 @@ public class BoardManager : MonoBehaviour
             {
                 continue;
             }
-            
+
             shortWay = minorList(shortWay, auxShortWay);
         }
         
@@ -288,6 +288,11 @@ public class BoardManager : MonoBehaviour
     {
         /* This ethdo check if the next possible movement of the cat is valid */
 
+        if (BoardManager.asteroids[next.getx(), next.gety()].GetComponent<Asteroid>().isDestroyed)
+        {
+            return false;
+        }
+        
         if (Cat.actualBoardCoordinatesPosition.y % 2 == 0)
         {
             if (next.getx() == Cat.actualBoardCoordinatesPosition.x + 1 &&
