@@ -40,9 +40,9 @@ public class BoardManager : MonoBehaviour
     {
         asteroids = new GameObject[xSize, ySize];
 
-        float startX = this.transform.position.x - 2f;
+        float startX = this.transform.position.x - 2.25f;
         float oddStartX = startX + (BoardManager.asteroidSize.x / 2.0f);
-        float startY = this.transform.position.y;
+        float startY = this.transform.position.y - 2.0f;
 
         for(int x = 0; x < xSize; x++)
         {
@@ -67,7 +67,7 @@ public class BoardManager : MonoBehaviour
         // Inicializate the cat
         GameObject newCat = Instantiate(
             cat,
-            new Vector3( ((int)(xSize / 2.0f) % 2 != 0 ? startX : oddStartX) + (BoardManager.asteroidSize.x * (xSize / 2.0f)),
+            new Vector3( ((int)(xSize / 2.0f) % 2 != 0 ?  oddStartX: startX ) + (BoardManager.asteroidSize.x * (xSize / 2.0f)),
                 startY + (BoardManager.asteroidSize.y * (ySize / 2.0f)),
                 0),
             cat.transform.rotation
@@ -86,87 +86,7 @@ public class BoardManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        /*int movX = 0, movY = 0;
-        if (Input.GetKeyDown(KeyCode.A))
-            movX = -1;
-        if (Input.GetKeyDown(KeyCode.D))
-            movX = 1;
 
-        if (Cat.actualBoardCoordinatesPosition.y % 2 == 0)
-        {
-            if (Input.GetKeyDown(KeyCode.Q))
-            {
-                movY = 1;
-                movX = -1;
-            }
-            
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                movY = 1;
-            }
-            
-            if (Input.GetKeyDown(KeyCode.Z))
-            {
-                movY = -1;
-                movX = -1;
-                
-            }
-            
-            if (Input.GetKeyDown(KeyCode.C))
-            {
-                movY = -1;
-            }
-                
-        }
-        else
-        {
-            if (Input.GetKeyDown(KeyCode.Q))
-            {
-                movY = 1;
-            }
-            
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                movY = 1;
-                movX = 1;
-            }
-            
-            if (Input.GetKeyDown(KeyCode.Z))
-            {
-                movY = -1;
-            }
-            
-            if (Input.GetKeyDown(KeyCode.C))
-            {
-                movY = -1;
-                movX = 1;
-            }
-        }
-        
-        
-        
-
-        //if (movX != 0 || movY != 0)
-        //{
-            if (!BoardManager.asteroids[(int)Cat.actualBoardCoordinatesPosition.x + movX, (int)Cat.actualBoardCoordinatesPosition.y + movY]
-                    .GetComponent<Asteroid>().isDestroyed)
-            {
-                // Set the new position
-                Cat.actualBoardCoordinatesPosition.x = Cat.actualBoardCoordinatesPosition.x + movX;
-                Cat.actualBoardCoordinatesPosition.y = Cat.actualBoardCoordinatesPosition.y + movY;
-
-                Cat.actualScreenPosition = BoardManager.asteroids[(int)Cat.actualBoardCoordinatesPosition.x + movX,
-                        (int)Cat.actualBoardCoordinatesPosition.y + movY]
-                    .transform.position;
-                // Move the sprite
-            
-                //Debug.Log(Cat.actualBoardCoordinatesPosition);
-
-                Cat.gameObject.transform.position = new Vector3(Cat.actualScreenPosition.x,
-                    Cat.actualScreenPosition.y,
-                    0);
-            }
-        //}*/
     }
 
 
