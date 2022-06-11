@@ -37,8 +37,10 @@ public class Asteroid : MonoBehaviour
 
     private void OnMouseDown()
     {
-        Debug.Log(this.actualBoardCoordinatesPosition);
+        //Debug.Log(this.actualBoardCoordinatesPosition);
         this.isDestroyed = true;
         Destroy(this.spriteRenderer);
+
+        BoardManager.generateShortWay();
     }
 }

@@ -7,17 +7,17 @@ using UnityEditor.PackageManager.UI;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+
 public class BoardManager : MonoBehaviour
 {
-
     public static BoardManager sharedInstance;
     private static Vector2 asteroidSize;
-    public List<Sprite> prefabs = new List<Sprite>();
+    public static List<Sprite> prefabs = new List<Sprite>();
     public GameObject currentAsteroid;
     public GameObject cat;
     public int xSize, ySize;
     
-    private GameObject[,] asteroids;
+    private static GameObject[,] asteroids;
 
     // Start is called before the first frame update
     void Start()
@@ -86,7 +86,7 @@ public class BoardManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        int movX = 0, movY = 0;
+        /*int movX = 0, movY = 0;
         if (Input.GetKeyDown(KeyCode.A))
             movX = -1;
         if (Input.GetKeyDown(KeyCode.D))
@@ -148,27 +148,185 @@ public class BoardManager : MonoBehaviour
 
         //if (movX != 0 || movY != 0)
         //{
-            if (!this.asteroids[(int)Cat.actualBoardCoordinatesPosition.x + movX, (int)Cat.actualBoardCoordinatesPosition.y + movY]
+            if (!BoardManager.asteroids[(int)Cat.actualBoardCoordinatesPosition.x + movX, (int)Cat.actualBoardCoordinatesPosition.y + movY]
                     .GetComponent<Asteroid>().isDestroyed)
             {
                 // Set the new position
                 Cat.actualBoardCoordinatesPosition.x = Cat.actualBoardCoordinatesPosition.x + movX;
                 Cat.actualBoardCoordinatesPosition.y = Cat.actualBoardCoordinatesPosition.y + movY;
 
-                Cat.actualScreenPosition = this.asteroids[(int)Cat.actualBoardCoordinatesPosition.x + movX,
+                Cat.actualScreenPosition = BoardManager.asteroids[(int)Cat.actualBoardCoordinatesPosition.x + movX,
                         (int)Cat.actualBoardCoordinatesPosition.y + movY]
                     .transform.position;
                 // Move the sprite
             
-                Debug.Log(Cat.actualBoardCoordinatesPosition);
+                //Debug.Log(Cat.actualBoardCoordinatesPosition);
 
                 Cat.gameObject.transform.position = new Vector3(Cat.actualScreenPosition.x,
                     Cat.actualScreenPosition.y,
                     0);
             }
-        //}
+        //}*/
+    }
+
+
+    public static void generateShortWay()
+    {
+        Cell origin = new Cell((int) Cat.actualBoardCoordinatesPosition.x, (int) Cat.actualBoardCoordinatesPosition.y);
+
+        // create the map
+        int[] map = new int[BoardManager.asteroids.GetLength(0) * BoardManager.asteroids.GetLength(1)];
         
-           
+        // k is the position in the unidimentional array
+        int k = 0;
         
+        for (int i = 0; i < BoardManager.asteroids.GetLength(0); i++)
+        {
+            for (int j = 0; j < BoardManager.asteroids.GetLength(1); j++)
+            {
+                if (BoardManager.asteroids[i, j].GetComponent<Asteroid>().isDestroyed)
+                    map[k] = 1;
+                
+                else
+                    map[k] = 0;
+
+                k = k + 1;
+            };
+        }
+
+        List<Cell> shortWay = null;
+
+        // get the short way
+        for (int i = 0; i < BoardManager.asteroids.GetLength(0); i++)
+        {
+            Cell dest = new Cell(i, 0);
+            
+            List<Cell> auxShortWay = Globals.getShortestPath(origin, dest, map, BoardManager.asteroids.GetLength(0), BoardManager.asteroids.GetLength(1));
+
+            if(auxShortWay.Count <= 1)
+                continue;
+            
+            if (!checkValidMovement(auxShortWay[1]))
+            {
+                continue;
+            }
+            
+            shortWay = minorList(shortWay, auxShortWay);
+        }
+        
+        
+        for (int i = 0; i < BoardManager.asteroids.GetLength(0); i++)
+        {
+            Cell dest = new Cell(i, BoardManager.asteroids.GetLength(1) - 1);
+            
+            List<Cell> auxShortWay = Globals.getShortestPath(origin, dest, map, BoardManager.asteroids.GetLength(0), BoardManager.asteroids.GetLength(1));
+            
+            if(auxShortWay.Count <= 1)
+                continue;
+            
+            if (!checkValidMovement(auxShortWay[1]))
+            {
+                continue;
+            }
+            
+            shortWay = minorList(shortWay, auxShortWay);
+        }
+
+        for (int j = 0; j< BoardManager.asteroids.GetLength(1); j++)
+        {
+            Cell dest = new Cell(0, j);
+            
+            List<Cell> auxShortWay = Globals.getShortestPath(origin, dest, map, BoardManager.asteroids.GetLength(0), BoardManager.asteroids.GetLength(1));
+            
+            if(auxShortWay.Count <= 1)
+                continue;
+            
+            if (!checkValidMovement(auxShortWay[1]))
+            {
+                continue;
+            }
+            
+            shortWay = minorList(shortWay, auxShortWay);
+        }
+        
+        for (int j = 0; j< BoardManager.asteroids.GetLength(1); j++)
+        {
+            Cell dest = new Cell(BoardManager.asteroids.GetLength(0) - 1, j);
+            
+            List<Cell> auxShortWay =  Globals.getShortestPath(origin, dest, map, BoardManager.asteroids.GetLength(0), BoardManager.asteroids.GetLength(1));
+            
+            if(auxShortWay.Count <= 1)
+                continue;
+            
+            if (!checkValidMovement(auxShortWay[1]))
+            {
+                continue;
+            }
+            
+            shortWay = minorList(shortWay, auxShortWay);
+        }
+        
+        
+        // move the cat
+        moveCat(shortWay[1]);
+    }
+    
+    
+    public static List<Cell> minorList(List<Cell> listOne, List<Cell> listTwo)
+    {
+        if (listOne == null)
+            return listTwo;
+
+        if (listTwo.Count < listOne.Count)
+            return listTwo;
+
+        return listOne;
+    }
+
+
+    public static bool checkValidMovement(Cell next)
+    {
+        /* This ethdo check if the next possible movement of the cat is valid */
+
+        if (Cat.actualBoardCoordinatesPosition.y % 2 == 0)
+        {
+            if (next.getx() == Cat.actualBoardCoordinatesPosition.x + 1 &&
+                next.gety() == Cat.actualBoardCoordinatesPosition.y + 1)
+                return false;
+
+            if (next.getx() == Cat.actualBoardCoordinatesPosition.x + 1 &&
+                next.gety() == Cat.actualBoardCoordinatesPosition.y - 1)
+                return false;
+        }
+        else
+        {
+            if (next.getx() == Cat.actualBoardCoordinatesPosition.x - 1 &&
+                next.gety() == Cat.actualBoardCoordinatesPosition.y - 1)
+                return false;
+
+            if (next.getx() == Cat.actualBoardCoordinatesPosition.x - 1 &&
+                next.gety() == Cat.actualBoardCoordinatesPosition.y + 1)
+                return false;
+        }
+
+        return true;
+
+    }
+
+
+    public static void moveCat(Cell nextMovement)
+    {
+        /* This function move the cat */
+        // Set the new position
+        Cat.actualBoardCoordinatesPosition.x = nextMovement.getx();
+        Cat.actualBoardCoordinatesPosition.y = nextMovement.gety();
+
+        Cat.actualScreenPosition = BoardManager.asteroids[ nextMovement.getx(), nextMovement.gety()]
+            .transform.position;
+        // Move the sprite
+
+        Cat.gameObject.transform.position = new Vector3(Cat.actualScreenPosition.x,
+            Cat.actualScreenPosition.y,
+            0);
     }
 }

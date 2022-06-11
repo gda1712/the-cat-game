@@ -450,8 +450,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fada63fbadccf806ea91d42887e2fbd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefabs:
-  - {fileID: -1433517725, guid: 887fe8bd8c8742a51a9e353a0e46bf83, type: 3}
   currentAsteroid: {fileID: 32000713083460658, guid: bc3a87bb7973e238498208823b99874f, type: 3}
   cat: {fileID: 3526643246069977499, guid: cdb0696376a9697759108d72843319f5, type: 3}
   xSize: 8
