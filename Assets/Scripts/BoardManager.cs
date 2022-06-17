@@ -6,6 +6,7 @@ using Unity.VisualScripting;
 using UnityEditor.PackageManager.UI;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEngine.SceneManagement;  
 
 
 public class BoardManager : MonoBehaviour
@@ -86,9 +87,20 @@ public class BoardManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        checkIfTheCatWin();
     }
 
+
+    public static void checkIfTheCatWin()
+    {
+        /* This functon check if the cat win */
+        Vector2 position = Cat.actualBoardCoordinatesPosition;
+        
+        if(position.x == 0 || position.y == 0 || 
+            position.x == BoardManager.asteroids.GetLength(0) - 1 || 
+            position.y == BoardManager.asteroids.GetLength(1) - 1)
+            SceneManager.LoadScene("Lost");  
+    }
 
     public static void generateShortWay()
     {
@@ -188,7 +200,15 @@ public class BoardManager : MonoBehaviour
         
         
         // move the cat
-        moveCat(shortWay[1]);
+        try
+        {
+            moveCat(shortWay[1]);
+        }
+        catch (Exception e)
+        {
+            SceneManager.LoadScene("Win");  
+        }
+        
     }
     
     
