@@ -1,12 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 //using UnityEditor.PackageManager.UI;
 using UnityEngine;
 using UnityEngine.UIElements;
-using UnityEngine.SceneManagement;  
+using UnityEngine.SceneManagement;
+using Random = UnityEngine.Random;
 
 
 public class BoardManager : MonoBehaviour
@@ -17,7 +19,7 @@ public class BoardManager : MonoBehaviour
     public GameObject currentAsteroid;
     public GameObject cat;
     public int xSize, ySize;
-    
+
     private static GameObject[,] asteroids;
 
     // Start is called before the first frame update
@@ -35,23 +37,23 @@ public class BoardManager : MonoBehaviour
         asteroidSize = currentAsteroid.GetComponent<BoxCollider2D>().size;
         CreateInitialBoard();
     }
-    
-    
+
+
     private void CreateInitialBoard()
     {
         asteroids = new GameObject[xSize, ySize];
 
-        float startX = this.transform.position.x - 2.25f;
+        float startX = this.transform.position.x - 1.95f;
         float oddStartX = startX + (BoardManager.asteroidSize.x / 2.0f);
         float startY = this.transform.position.y - 2.0f;
 
-        for(int x = 0; x < xSize; x++)
+        for (int x = 0; x < xSize; x++)
         {
-            for(int y = 0; y < ySize; y++)
+            for (int y = 0; y < ySize; y++)
             {
                 GameObject newAsteroid = Instantiate(
                     currentAsteroid,
-                    new Vector3( (y % 2 == 0 ? startX : oddStartX) + (BoardManager.asteroidSize.x * x),
+                    new Vector3((y % 2 == 0 ? startX : oddStartX) + (BoardManager.asteroidSize.x * x),
                         startY + (BoardManager.asteroidSize.y * y),
                         0),
                     currentAsteroid.transform.rotation
@@ -59,29 +61,45 @@ public class BoardManager : MonoBehaviour
                 newAsteroid.name = string.Format("Asteroid[{0}][{1}]", x, y);
 
                 newAsteroid.GetComponent<Asteroid>().actualBoardCoordinatesPosition = new Vector2(x, y);
-                
+
                 asteroids[x, y] = newAsteroid;
 
             }
         }
-        
+
         // Inicializate the cat
         GameObject newCat = Instantiate(
             cat,
-            new Vector3( ((int)(xSize / 2.0f) % 2 != 0 ?  oddStartX: startX ) + (BoardManager.asteroidSize.x * (xSize / 2.0f)),
+            new Vector3(
+                ((int)(xSize / 2.0f) % 2 != 0 ? oddStartX : startX) + (BoardManager.asteroidSize.x * (xSize / 2.0f)),
                 startY + (BoardManager.asteroidSize.y * (ySize / 2.0f)),
                 0),
             cat.transform.rotation
         );
         newCat.name = string.Format("Cat[{0}][{1}]", (int)(xSize / 2.0f), (int)(ySize / 2.0f));
-        
+
         // save the cat position
         Cat.actualScreenPosition = newCat.transform.position;
         Cat.actualBoardCoordinatesPosition = new Vector2((int)(xSize / 2.0f), (int)(ySize / 2.0f));
 
         Cat.gameObject = newCat;
         //asteroids[(int)(xSize / 2.0f), (int)(ySize / 2.0f)] = newCat;
-    }
+
+        int randomNumber = Random.Range(5, 10);
+        
+        Cell[] cells = new Cell[randomNumber];
+        for (int l = 0; l < randomNumber; l++)
+        {
+            int random1 = Random.Range(0, this.xSize - 1);
+            int random2 = Random.Range(0, this.ySize - 1);
+
+            if (!Cat.actualBoardCoordinatesPosition.Equals(new Cell(random1, random2)))
+            {
+                BoardManager.asteroids[random1, random2].GetComponent<Asteroid>().destroyAsteroid();
+            }
+                
+        }
+}
     
 
     // Update is called once per frame
@@ -111,19 +129,22 @@ public class BoardManager : MonoBehaviour
         
         // k is the position in the unidimentional array
         int k = 0;
-        
-        for (int i = 0; i < BoardManager.asteroids.GetLength(0); i++)
+
+        // create the map unidimentional
+        for (int j = 0; j < BoardManager.asteroids.GetLength(1); j++)
         {
-            for (int j = 0; j < BoardManager.asteroids.GetLength(1); j++)
+            for (int i = 0; i < BoardManager.asteroids.GetLength(0); i++)
             {
                 if (BoardManager.asteroids[i, j].GetComponent<Asteroid>().isDestroyed)
+                {
+                    //Debug.Log(String.Concat("Pos: ", i, " ", j, " Iteración: ", k)); 
                     map[k] = 1;
-                
+                }
                 else
                     map[k] = 0;
 
                 k = k + 1;
-            };
+            }
         }
 
         List<Cell> shortWay = null;
@@ -201,7 +222,7 @@ public class BoardManager : MonoBehaviour
         
         // move the cat
         try
-        {
+        { 
             moveCat(shortWay[1]);
         }
         catch (Exception e)
@@ -228,11 +249,11 @@ public class BoardManager : MonoBehaviour
     {
         /* This ethdo check if the next possible movement of the cat is valid */
 
-        if (BoardManager.asteroids[next.getx(), next.gety()].GetComponent<Asteroid>().isDestroyed)
+        /*if (BoardManager.asteroids[next.getx(), next.gety()].GetComponent<Asteroid>().isDestroyed)
         {
             return false;
-        }
-        
+        }*/
+
         if (Cat.actualBoardCoordinatesPosition.y % 2 == 0)
         {
             if (next.getx() == Cat.actualBoardCoordinatesPosition.x + 1 &&
